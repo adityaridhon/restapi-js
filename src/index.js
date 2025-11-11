@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import fasilitasRoute from "./routes/fasilitasRoute.js";
+import studioRoute from "./routes/studioRoute.js";
 
 dotenv.config();
 
@@ -23,3 +24,5 @@ app.get("/", (request, response) => {
 
 // endpoint fasilitas
 app.use("/api/fasilitas", fasilitasRoute);
+// endpoint studio
+app.use("/api/studio", studioRoute);

@@ -12,8 +12,8 @@ const router = express.Router();
 // routingnya
 
 router.get("/", getFasilitas);
-router.post("/", createFasilitas);
-router.put("/:id", updateFasilitas);
-router.delete("/:id", deleteFasilitas);
+router.post("/admin", createFasilitas);
+router.put("/admin/:id", updateFasilitas);
+router.delete("/admin/:id", deleteFasilitas);
 
 export default router;
