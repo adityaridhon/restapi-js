@@ -1,9 +1,11 @@
-import pool from "../../config/db.js";
+import { userdbPool, admindbPool } from "../../config/db.js";
 
 // api lihat studio user
 export const getStudioUser = async (request, response) => {
   try {
-    const [result] = await pool.query("CALL sp_lihat_studio_user()");
+    const [result] = await userdbPool.query(
+      "CALL sp_lihat_semua_studio_user()"
+    );
     return response.status(200).json({
       success: true,
       message: "Berhasil mengambil data studio yang aktif",
@@ -20,7 +22,9 @@ export const getStudioUser = async (request, response) => {
 // api lihat studio admin
 export const getStudioAdmin = async (request, response) => {
   try {
-    const [result] = await pool.query("CALL sp_lihat_studio_admin()");
+    const [result] = await admindbPool.query(
+      "CALL sp_lihat_semua_studio_admin()"
+    );
     return response.status(200).json({
       success: true,
       message: "Berhasil mengambil data studio admin",
@@ -34,7 +38,56 @@ export const getStudioAdmin = async (request, response) => {
   }
 };
 
-// api tambah fasilitas
+// get studio by id
+export const getStudioByIdAdmin = async (request, response) => {
+  const { id } = request.params;
+  try {
+    const [result] = await admindbPool.query("CALL sp_lihat_studio_id(?)", [
+      id,
+    ]);
+    return response.status(200).json({
+      success: true,
+      message: `Berhasil mengambil data studio berdasarkan ID: ${id}`,
+      data: result[0],
+    });
+  } catch (error) {
+    console.log(error);
+    if (error.sqlMessage) {
+      return response.status(404).json({
+        success: false,
+        message: error.sqlMessage,
+      });
+    }
+    return response
+      .status(500)
+      .json({ message: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const getStudioByIdUser = async (request, response) => {
+  const { id } = request.params;
+  try {
+    const [result] = await userdbPool.query("CALL sp_lihat_studio_id(?)", [id]);
+    return response.status(200).json({
+      success: true,
+      message: `Berhasil mengambil data studio berdasarkan ID: ${id}`,
+      data: result[0],
+    });
+  } catch (error) {
+    console.log(error);
+    if (error.sqlMessage) {
+      return response.status(400).json({
+        success: false,
+        message: error.sqlMessage,
+      });
+    }
+    return response
+      .status(500)
+      .json({ message: "Terjadi kesalahan pada server" });
+  }
+};
+
+// api tambah studio
 export const createStudio = async (request, response) => {
   const {
     nama_studio,
@@ -46,7 +99,7 @@ export const createStudio = async (request, response) => {
     id_fasilitas,
   } = request.body;
   try {
-    const [result] = await pool.query(
+    const [result] = await admindbPool.query(
       "CALL sp_tambah_studio(?, ?, ?, ?, ?, ?, ?)",
       [
         nama_studio,
@@ -66,7 +119,7 @@ export const createStudio = async (request, response) => {
   } catch (error) {
     console.log(error);
     if (error.sqlMessage) {
-      return response.status(403).json({
+      return response.status(400).json({
         success: false,
         message: error.sqlMessage,
       });
@@ -77,7 +130,7 @@ export const createStudio = async (request, response) => {
   }
 };
 
-// api udpdate fsiltas
+// api udpdate studio
 export const updateStudio = async (request, response) => {
   const { id } = request.params;
   const {
@@ -91,8 +144,8 @@ export const updateStudio = async (request, response) => {
   } = request.body;
 
   try {
-    const [result] = await pool.query(
-      "CALL sp_update_studio(?, ?, ?, ?, ?, ?, ?, ?)",
+    const [result] = await admindbPool.query(
+      "CALL sp_edit_studio(?, ?, ?, ?, ?, ?, ?, ?)",
       [
         id,
         nama_studio,
@@ -104,7 +157,6 @@ export const updateStudio = async (request, response) => {
         id_fasilitas,
       ]
     );
-
     return response.status(200).json({
       success: true,
       message: "Studio berhasil diperbarui.",
@@ -119,7 +171,6 @@ export const updateStudio = async (request, response) => {
         message: error.sqlMessage,
       });
     }
-
     return response.status(500).json({
       success: false,
       message: "Terjadi kesalahan pada server.",
@@ -127,12 +178,11 @@ export const updateStudio = async (request, response) => {
   }
 };
 
-// api hapus fasilitas
+// api hapus strudio
 export const deleteStudio = async (request, response) => {
   const { id } = request.params;
-
   try {
-    const [result] = await pool.query("CALL sp_hapus_studio(?)", [id]);
+    const [result] = await admindbPool.query("CALL sp_hapus_studio(?)", [id]);
     return response.status(200).json({
       success: true,
       message: "Studio berhasil dihapus.",
